@@ -10,6 +10,13 @@ using QuestPDF.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// If Render or container environment provides PORT, bind to it
+var port = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrEmpty(port))
+{
+    builder.WebHost.UseUrls($"http://+:{port}");
+}
+
 QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
 
 // ---- Add services to the container ----
@@ -52,7 +59,7 @@ builder.Services.AddSwaggerGen(options =>
 
 // Database
 builder.Services.AddDbContext<EmsDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Dependency Injection: register our services
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -99,7 +106,7 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // ---- Configure the HTTP request pipeline ----
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("EnableSwagger", true))
 {
     app.UseSwagger();
     app.UseSwaggerUI();
@@ -112,6 +119,7 @@ app.UseHttpsRedirection();
 app.UseAuthentication();   // WHO are you? (must come before Authorization)
 app.UseAuthorization();    // WHAT are you allowed to do?
 
+app.MapGet("/", () => Results.Ok(new { message = "Employee Management System API is running.", status = "Healthy" }));
 app.MapControllers();
 
 app.Run();

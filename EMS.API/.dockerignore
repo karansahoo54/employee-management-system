@@ -1,0 +1,8 @@
+**/.git
+**/.vs
+**/bin
+**/obj
+**/.vscode
+**/*.user
+**/*.suo
+**/node_modules
