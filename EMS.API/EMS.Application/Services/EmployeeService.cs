@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,10 +22,12 @@ namespace EMS.Application.Services
 
         public async Task<List<EmployeeResponseDto>> GetAllAsync()
         {
-            return await _context.Employees
+            var employees = await _context.Employees
                 .Include(e => e.Department)
-                .Select(e => MapToDto(e))
+                .OrderBy(e => e.EmployeeId)
                 .ToListAsync();
+
+            return employees.Select(MapToDto).ToList();
         }
 
         public async Task<EmployeeResponseDto?> GetByIdAsync(int id)
@@ -47,7 +49,7 @@ namespace EMS.Application.Services
                 DepartmentId = request.DepartmentId,
                 Designation = request.Designation,
                 Salary = request.Salary,
-                JoiningDate = request.JoiningDate,
+                JoiningDate = request.JoiningDate.HasValue ? DateTime.SpecifyKind(request.JoiningDate.Value, DateTimeKind.Utc) : null,
                 IsActive = request.IsActive
             };
 
@@ -55,7 +57,10 @@ namespace EMS.Application.Services
             await _context.SaveChangesAsync();
 
             // Reload with Department included so the response has DepartmentName
-            await _context.Entry(employee).Reference(e => e.Department).LoadAsync();
+            if (employee.DepartmentId.HasValue)
+            {
+                await _context.Entry(employee).Reference(e => e.Department).LoadAsync();
+            }
 
             return MapToDto(employee);
         }
@@ -70,7 +75,7 @@ namespace EMS.Application.Services
                 DepartmentId = request.DepartmentId,
                 Designation = request.Designation,
                 Salary = request.Salary,
-                JoiningDate = request.JoiningDate,
+                JoiningDate = request.JoiningDate.HasValue ? DateTime.SpecifyKind(request.JoiningDate.Value, DateTimeKind.Utc) : null,
                 IsActive = request.IsActive
             }).ToList();
 
@@ -79,7 +84,10 @@ namespace EMS.Application.Services
 
             foreach (var emp in employees)
             {
-                await _context.Entry(emp).Reference(e => e.Department).LoadAsync();
+                if (emp.DepartmentId.HasValue)
+                {
+                    await _context.Entry(emp).Reference(e => e.Department).LoadAsync();
+                }
             }
 
             return employees.Select(e => MapToDto(e)).ToList();
@@ -97,11 +105,18 @@ namespace EMS.Application.Services
             employee.DepartmentId = request.DepartmentId;
             employee.Designation = request.Designation;
             employee.Salary = request.Salary;
-            employee.JoiningDate = request.JoiningDate;
+            employee.JoiningDate = request.JoiningDate.HasValue ? DateTime.SpecifyKind(request.JoiningDate.Value, DateTimeKind.Utc) : null;
             employee.IsActive = request.IsActive;
 
             await _context.SaveChangesAsync();
-            await _context.Entry(employee).Reference(e => e.Department).LoadAsync();
+            if (employee.DepartmentId.HasValue)
+            {
+                await _context.Entry(employee).Reference(e => e.Department).LoadAsync();
+            }
+            else
+            {
+                employee.Department = null;
+            }
 
             return MapToDto(employee);
         }

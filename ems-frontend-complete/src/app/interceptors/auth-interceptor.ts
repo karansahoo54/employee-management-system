@@ -7,7 +7,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
 
   // Never attach Authorization header to login or register requests
-  const isAuthEndpoint = req.url.includes('/api/Auth/login') || req.url.includes('/api/Auth/register');
+  const urlLower = req.url.toLowerCase();
+  const isAuthEndpoint = urlLower.includes('/api/auth/login') || urlLower.includes('/api/auth/register');
 
   const token = localStorage.getItem('token');
   const isValidToken = token && token.trim().length > 0 && token !== 'undefined' && token !== 'null';

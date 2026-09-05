@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -168,9 +168,15 @@ namespace EMS.Application.Services
             var query = _context.Attendances.Include(a => a.Employee).AsQueryable();
 
             if (fromDate.HasValue)
-                query = query.Where(a => a.Date >= fromDate.Value);
+            {
+                var fromUtc = DateTime.SpecifyKind(fromDate.Value.Date, DateTimeKind.Utc);
+                query = query.Where(a => a.Date >= fromUtc);
+            }
             if (toDate.HasValue)
-                query = query.Where(a => a.Date <= toDate.Value);
+            {
+                var toUtc = DateTime.SpecifyKind(toDate.Value.Date.AddDays(1).AddTicks(-1), DateTimeKind.Utc);
+                query = query.Where(a => a.Date <= toUtc);
+            }
 
             var records = await query.OrderBy(a => a.Date).ToListAsync();
 
