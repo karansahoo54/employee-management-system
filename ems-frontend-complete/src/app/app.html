@@ -1,0 +1,83 @@
+<app-toast-container></app-toast-container>
+
+<div *ngIf="authService.isLoggedIn() && !isAuthPage()" class="dashboard-layout">
+  <!-- Backdrop for mobile drawer -->
+  <div *ngIf="sidebarOpen" class="sidebar-backdrop d-lg-none" (click)="toggleSidebar()"></div>
+
+  <!-- Sidebar -->
+  <aside class="dashboard-sidebar" [class.open]="sidebarOpen">
+    <div class="sidebar-header">
+      <div class="brand-badge">
+        <i class="bi bi-people-fill"></i>
+      </div>
+      <div class="brand-details">
+        <span class="brand-title">EMS Portal</span>
+        <span class="brand-subtitle">Enterprise Suite</span>
+      </div>
+    </div>
+
+    <div class="sidebar-menu">
+      <div class="menu-label">Main Navigation</div>
+      <a routerLink="/employees" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="sidebar-link" (click)="sidebarOpen = false">
+        <i class="bi bi-person-lines-fill"></i>
+        <span>Employees</span>
+      </a>
+      <a routerLink="/employees/new" routerLinkActive="active" class="sidebar-link" (click)="sidebarOpen = false">
+        <i class="bi bi-person-plus-fill"></i>
+        <span>Add Employee</span>
+      </a>
+      <a routerLink="/reports" routerLinkActive="active" class="sidebar-link" (click)="sidebarOpen = false">
+        <i class="bi bi-file-earmark-bar-graph-fill"></i>
+        <span>Reports & Analytics</span>
+      </a>
+    </div>
+
+    <!-- User Profile Footer -->
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar">
+          {{ authService.getUsername() ? authService.getUsername()!.charAt(0).toUpperCase() : 'U' }}
+        </div>
+        <div class="user-info">
+          <span class="user-name">{{ authService.getUsername() }}</span>
+          <span class="user-role">{{ authService.getRole() || 'Administrator' }}</span>
+        </div>
+        <button class="btn-logout" (click)="logout()" title="Logout">
+          <i class="bi bi-box-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content Wrapper -->
+  <div class="dashboard-main">
+    <header class="top-navbar">
+      <button class="btn btn-sm btn-light d-lg-none me-2" (click)="toggleSidebar()">
+        <i class="bi bi-list fs-5"></i>
+      </button>
+
+      <div class="top-brand d-lg-none fw-bold text-primary">
+        EMS Portal
+      </div>
+
+      <div class="ms-auto d-flex align-items-center gap-3">
+        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1.5 rounded-pill">
+          <i class="bi bi-shield-check me-1"></i>
+          {{ authService.getRole() || 'Admin' }}
+        </span>
+        <button class="btn btn-outline-danger btn-sm" (click)="logout()">
+          <i class="bi bi-box-arrow-right me-1"></i> Logout
+        </button>
+      </div>
+    </header>
+
+    <main class="page-viewport">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>
+
+<!-- Direct view when unauthenticated or on auth page (e.g. login) -->
+<div *ngIf="!authService.isLoggedIn() || isAuthPage()">
+  <router-outlet></router-outlet>
+</div>

@@ -1,0 +1,225 @@
+<div class="page-container">
+  <!-- Page Header -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+      <h2 class="fw-bold mb-1 text-dark">Employees</h2>
+      <p class="text-muted small mb-0">Manage your organization's workforce, status, and departments</p>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <button
+        *ngIf="selectedIds.length > 0"
+        class="btn btn-danger shadow-sm"
+        (click)="promptDeleteBulk()">
+        <i class="bi bi-trash3-fill"></i>
+        Delete Selected ({{ selectedIds.length }})
+      </button>
+      <a routerLink="/employees/new" class="btn btn-primary shadow-sm">
+        <i class="bi bi-plus-lg"></i>
+        Add Employee
+      </a>
+    </div>
+  </div>
+
+  <!-- Search & Filter Controls -->
+  <div class="card-modern p-3 mb-4">
+    <div class="row g-3 align-items-center">
+      <div class="col-md-6 col-lg-5">
+        <div class="input-group">
+          <span class="input-group-text bg-transparent border-end-0 text-muted">
+            <i class="bi bi-search"></i>
+          </span>
+          <input
+            type="text"
+            class="form-control border-start-0 ps-0"
+            [(ngModel)]="searchTerm"
+            placeholder="Search by name, email, department, designation...">
+          <button *ngIf="searchTerm" class="btn btn-link text-muted pe-3 text-decoration-none" (click)="searchTerm = ''">
+            <i class="bi bi-x-circle-fill"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-7 d-flex justify-content-md-end gap-2">
+        <div class="btn-group filter-btn-group" role="group">
+          <button
+            type="button"
+            class="btn btn-sm"
+            [class.btn-primary]="statusFilter === 'ALL'"
+            [class.btn-outline-secondary]="statusFilter !== 'ALL'"
+            (click)="statusFilter = 'ALL'">
+            All ({{ employees.length }})
+          </button>
+          <button
+            type="button"
+            class="btn btn-sm"
+            [class.btn-primary]="statusFilter === 'ACTIVE'"
+            [class.btn-outline-secondary]="statusFilter !== 'ACTIVE'"
+            (click)="statusFilter = 'ACTIVE'">
+            Active
+          </button>
+          <button
+            type="button"
+            class="btn btn-sm"
+            [class.btn-primary]="statusFilter === 'INACTIVE'"
+            [class.btn-outline-secondary]="statusFilter !== 'INACTIVE'"
+            (click)="statusFilter = 'INACTIVE'">
+            Inactive
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error alert if API fails -->
+  <div class="alert alert-danger d-flex align-items-center gap-2 mb-4" *ngIf="errorMessage">
+    <i class="bi bi-exclamation-triangle-fill flex-shrink-0"></i>
+    <div>{{ errorMessage }}</div>
+    <button class="btn btn-sm btn-outline-danger ms-auto" (click)="loadEmployees()">Retry</button>
+  </div>
+
+  <!-- Table Card -->
+  <div class="card-modern overflow-hidden">
+    <!-- Loading skeleton / spinner -->
+    <div class="py-5 text-center" *ngIf="isLoading">
+      <div class="spinner-border text-primary mb-3" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <div class="text-muted small">Loading employee records...</div>
+    </div>
+
+    <!-- Table content -->
+    <div class="table-responsive" *ngIf="!isLoading">
+      <table class="table-modern mb-0">
+        <thead>
+          <tr>
+            <th style="width: 44px;">
+              <input
+                type="checkbox"
+                class="form-check-input"
+                [checked]="allSelected"
+                (change)="toggleSelectAll($event)">
+            </th>
+            <th>Employee</th>
+            <th>Contact</th>
+            <th>Department</th>
+            <th>Designation</th>
+            <th>Salary</th>
+            <th>Status</th>
+            <th class="text-end pe-4">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let emp of filteredEmployees" [class.table-active]="isSelected(emp.employeeId)">
+            <td>
+              <input
+                type="checkbox"
+                class="form-check-input"
+                [checked]="isSelected(emp.employeeId)"
+                (change)="toggleSelect(emp.employeeId, $event)">
+            </td>
+            <td>
+              <div class="d-flex align-items-center gap-3">
+                <div class="avatar-badge">
+                  {{ getInitials(emp.fullName) }}
+                </div>
+                <div>
+                  <div class="fw-semibold text-dark">{{ emp.fullName }}</div>
+                  <div class="text-muted small font-monospace">ID: #{{ emp.employeeId }}</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="small text-dark">{{ emp.email }}</div>
+              <div class="text-muted small" *ngIf="emp.phone">
+                <i class="bi bi-telephone me-1"></i>{{ emp.phone }}
+              </div>
+              <div class="text-muted small" *ngIf="!emp.phone">-</div>
+            </td>
+            <td>
+              <span class="badge-dept" *ngIf="emp.departmentName">
+                <i class="bi bi-building me-1"></i>{{ emp.departmentName }}
+              </span>
+              <span class="text-muted small" *ngIf="!emp.departmentName">Unassigned</span>
+            </td>
+            <td>
+              <span class="small fw-medium text-dark">{{ emp.designation || '-' }}</span>
+            </td>
+            <td>
+              <span class="small fw-semibold text-dark" *ngIf="emp.salary">
+                ${{ emp.salary | number:'1.2-2' }}
+              </span>
+              <span class="text-muted small" *ngIf="!emp.salary">-</span>
+            </td>
+            <td>
+              <span class="badge-status-active" *ngIf="emp.isActive">
+                <i class="bi bi-dot fs-5 p-0 lh-1"></i> Active
+              </span>
+              <span class="badge-status-inactive" *ngIf="!emp.isActive">
+                <i class="bi bi-dot fs-5 p-0 lh-1"></i> Inactive
+              </span>
+            </td>
+            <td class="text-end pe-4">
+              <div class="btn-group">
+                <a
+                  [routerLink]="['/employees/edit', emp.employeeId]"
+                  class="btn btn-sm btn-outline-primary py-1 px-2"
+                  title="Edit Employee">
+                  <i class="bi bi-pencil-square"></i>
+                </a>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-danger py-1 px-2"
+                  (click)="promptDeleteSingle(emp.employeeId, emp.fullName)"
+                  title="Delete Employee">
+                  <i class="bi bi-trash3"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Empty State -->
+          <tr *ngIf="filteredEmployees.length === 0">
+            <td colspan="8" class="py-5 text-center">
+              <div class="empty-state-box py-4">
+                <div class="empty-icon-circle mx-auto mb-3">
+                  <i class="bi bi-people text-muted fs-2"></i>
+                </div>
+                <h5 class="fw-semibold text-dark mb-1">No employees found</h5>
+                <p class="text-muted small mb-3">
+                  {{ searchTerm ? 'No records match your search query.' : 'Get started by creating your first employee.' }}
+                </p>
+                <a routerLink="/employees/new" class="btn btn-primary btn-sm" *ngIf="!searchTerm">
+                  <i class="bi bi-plus-lg me-1"></i> Add Employee
+                </a>
+                <button class="btn btn-outline-secondary btn-sm" *ngIf="searchTerm" (click)="searchTerm = ''">
+                  Clear Search
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Table Footer / Count -->
+    <div class="p-3 bg-light border-top d-flex justify-content-between align-items-center small text-muted" *ngIf="!isLoading && employees.length > 0">
+      <div>
+        Showing {{ filteredEmployees.length }} of {{ employees.length }} employees
+      </div>
+      <div *ngIf="selectedIds.length > 0" class="fw-semibold text-primary">
+        {{ selectedIds.length }} employee(s) selected
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Custom Confirmation Modal -->
+<app-confirm-modal
+  [isOpen]="modalOpen"
+  [title]="modalTitle"
+  [message]="modalMessage"
+  confirmText="Yes, Delete"
+  confirmBtnClass="btn-danger"
+  (confirmed)="onModalConfirm()"
+  (cancelled)="onModalCancel()">
+</app-confirm-modal>

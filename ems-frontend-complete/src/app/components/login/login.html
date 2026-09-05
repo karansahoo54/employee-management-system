@@ -1,0 +1,90 @@
+<div class="login-wrapper">
+  <div class="login-container">
+    <div class="card-modern login-card p-4 p-sm-5">
+      <!-- Brand & Header -->
+      <div class="text-center mb-4">
+        <div class="login-logo-box mx-auto mb-3">
+          <i class="bi bi-people-fill"></i>
+        </div>
+        <h3 class="fw-bold mb-1 text-dark">EMS Portal</h3>
+        <p class="text-muted small">Sign in to manage employees, departments & reports</p>
+      </div>
+
+      <!-- Error Alert -->
+      <div class="alert alert-danger d-flex align-items-center gap-2 py-2.5 px-3 rounded-3 mb-4" *ngIf="errorMessage">
+        <i class="bi bi-exclamation-circle-fill flex-shrink-0"></i>
+        <div class="small">{{ errorMessage }}</div>
+      </div>
+
+      <!-- Login Form -->
+      <form (ngSubmit)="onSubmit()" novalidate>
+        <div class="mb-3">
+          <label class="form-label small fw-semibold text-secondary">Username</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light border-end-0 text-muted">
+              <i class="bi bi-person"></i>
+            </span>
+            <input
+              type="text"
+              class="form-control border-start-0 ps-0"
+              [(ngModel)]="username"
+              name="username"
+              placeholder="Enter your username"
+              [class.is-invalid]="submitted && !username"
+              autocomplete="username"
+              required>
+          </div>
+          <div class="invalid-feedback d-block" *ngIf="submitted && !username">
+            Username is required.
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <label class="form-label small fw-semibold text-secondary">Password</label>
+          </div>
+          <div class="input-group">
+            <span class="input-group-text bg-light border-end-0 text-muted">
+              <i class="bi bi-lock"></i>
+            </span>
+            <input
+              [type]="showPassword ? 'text' : 'password'"
+              class="form-control border-start-0 border-end-0 ps-0"
+              [(ngModel)]="password"
+              name="password"
+              placeholder="Enter your password"
+              [class.is-invalid]="submitted && !password"
+              autocomplete="current-password"
+              required>
+            <button
+              type="button"
+              class="input-group-text bg-light border-start-0 text-muted btn-eye"
+              (click)="togglePassword()"
+              tabindex="-1">
+              <i class="bi" [ngClass]="showPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
+            </button>
+          </div>
+          <div class="invalid-feedback d-block" *ngIf="submitted && !password">
+            Password is required.
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          class="btn btn-primary w-100 py-2.5 mt-2 fw-semibold shadow-sm"
+          [disabled]="isLoading">
+          <span class="spinner-border spinner-border-sm me-2" *ngIf="isLoading" role="status"></span>
+          <span>{{ isLoading ? 'Authenticating...' : 'Sign In' }}</span>
+        </button>
+      </form>
+
+      <!-- Quick Fill Demo Helper -->
+      <div class="demo-helper mt-4 pt-3 border-top text-center">
+        <span class="text-muted small d-block mb-2">Evaluating this assignment?</span>
+        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" (click)="fillDemoCredentials()">
+          <i class="bi bi-lightning-charge-fill text-warning me-1"></i> Quick Fill Admin Credentials
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

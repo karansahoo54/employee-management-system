@@ -1,0 +1,174 @@
+<div class="reports-page-container">
+  <!-- Header -->
+  <div class="mb-4">
+    <h2 class="fw-bold text-dark mb-1">Reports & Document Export</h2>
+    <p class="text-muted small mb-0">Generate and download official PDF summaries and Excel workbooks directly from the system</p>
+  </div>
+
+  <div class="row g-4">
+    <!-- Card 1: Employee Directory -->
+    <div class="col-lg-6">
+      <div class="card-modern p-4 h-100 d-flex flex-column">
+        <div class="d-flex align-items-start gap-3 mb-3">
+          <div class="report-icon-box bg-primary-subtle text-primary">
+            <i class="bi bi-people-fill fs-3"></i>
+          </div>
+          <div>
+            <h5 class="fw-semibold text-dark mb-1">Employee Directory</h5>
+            <p class="text-muted small mb-0">
+              Comprehensive roster of all personnel containing names, email, phone, designation, and department details.
+            </p>
+          </div>
+        </div>
+
+        <div class="report-meta bg-light p-2.5 rounded-3 mb-4 small text-muted">
+          <div class="d-flex justify-content-between py-1 border-bottom">
+            <span>Engine:</span>
+            <span class="fw-medium text-dark">QuestPDF / ClosedXML</span>
+          </div>
+          <div class="d-flex justify-content-between py-1">
+            <span>Available Formats:</span>
+            <span class="fw-medium text-dark">PDF (.pdf) & Excel (.xlsx)</span>
+          </div>
+        </div>
+
+        <div class="mt-auto d-flex gap-2">
+          <button
+            class="btn btn-outline-danger w-50 py-2"
+            (click)="downloadEmployeePdf()"
+            [disabled]="isLoading('emp-pdf')">
+            <span class="spinner-border spinner-border-sm" *ngIf="isLoading('emp-pdf')"></span>
+            <i class="bi bi-file-earmark-pdf-fill" *ngIf="!isLoading('emp-pdf')"></i>
+            <span>{{ isLoading('emp-pdf') ? 'Generating...' : 'Export PDF' }}</span>
+          </button>
+          <button
+            class="btn btn-outline-success w-50 py-2"
+            (click)="downloadEmployeeExcel()"
+            [disabled]="isLoading('emp-excel')">
+            <span class="spinner-border spinner-border-sm" *ngIf="isLoading('emp-excel')"></span>
+            <i class="bi bi-file-earmark-excel-fill" *ngIf="!isLoading('emp-excel')"></i>
+            <span>{{ isLoading('emp-excel') ? 'Generating...' : 'Export Excel' }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 2: Department Breakdown -->
+    <div class="col-lg-6">
+      <div class="card-modern p-4 h-100 d-flex flex-column">
+        <div class="d-flex align-items-start gap-3 mb-3">
+          <div class="report-icon-box bg-info-subtle text-info">
+            <i class="bi bi-building fs-3"></i>
+          </div>
+          <div>
+            <h5 class="fw-semibold text-dark mb-1">Department Summary</h5>
+            <p class="text-muted small mb-0">
+              Overview of organization units, headcounts per department, and active division allocations.
+            </p>
+          </div>
+        </div>
+
+        <div class="report-meta bg-light p-2.5 rounded-3 mb-4 small text-muted">
+          <div class="d-flex justify-content-between py-1 border-bottom">
+            <span>Engine:</span>
+            <span class="fw-medium text-dark">ClosedXML Spreadsheet</span>
+          </div>
+          <div class="d-flex justify-content-between py-1">
+            <span>Output:</span>
+            <span class="fw-medium text-dark">Spreadsheet (.xlsx)</span>
+          </div>
+        </div>
+
+        <div class="mt-auto">
+          <button
+            class="btn btn-outline-success w-100 py-2"
+            (click)="downloadDepartmentExcel()"
+            [disabled]="isLoading('dept-excel')">
+            <span class="spinner-border spinner-border-sm" *ngIf="isLoading('dept-excel')"></span>
+            <i class="bi bi-file-earmark-excel-fill" *ngIf="!isLoading('dept-excel')"></i>
+            <span>{{ isLoading('dept-excel') ? 'Exporting...' : 'Download Department Excel' }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 3: Attendance Tracking with Date Filter -->
+    <div class="col-lg-6">
+      <div class="card-modern p-4 h-100 d-flex flex-column">
+        <div class="d-flex align-items-start gap-3 mb-3">
+          <div class="report-icon-box bg-warning-subtle text-warning">
+            <i class="bi bi-calendar2-check-fill fs-3"></i>
+          </div>
+          <div>
+            <h5 class="fw-semibold text-dark mb-1">Attendance Records</h5>
+            <p class="text-muted small mb-0">
+              Historical employee presence, clock-in tracking, and absence records with custom date range selection.
+            </p>
+          </div>
+        </div>
+
+        <!-- Date Range Filter -->
+        <div class="row g-2 mb-3">
+          <div class="col-6">
+            <label class="form-label small fw-semibold text-muted mb-1">From Date</label>
+            <input type="date" class="form-control form-control-sm" [(ngModel)]="fromDate">
+          </div>
+          <div class="col-6">
+            <label class="form-label small fw-semibold text-muted mb-1">To Date</label>
+            <input type="date" class="form-control form-control-sm" [(ngModel)]="toDate">
+          </div>
+        </div>
+
+        <div class="mt-auto">
+          <button
+            class="btn btn-outline-success w-100 py-2"
+            (click)="downloadAttendanceExcel()"
+            [disabled]="isLoading('att-excel')">
+            <span class="spinner-border spinner-border-sm" *ngIf="isLoading('att-excel')"></span>
+            <i class="bi bi-file-earmark-excel-fill" *ngIf="!isLoading('att-excel')"></i>
+            <span>{{ isLoading('att-excel') ? 'Exporting...' : 'Download Attendance Excel' }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 4: Salary & Payroll Summary -->
+    <div class="col-lg-6">
+      <div class="card-modern p-4 h-100 d-flex flex-column">
+        <div class="d-flex align-items-start gap-3 mb-3">
+          <div class="report-icon-box bg-success-subtle text-success">
+            <i class="bi bi-cash-coin fs-3"></i>
+          </div>
+          <div>
+            <h5 class="fw-semibold text-dark mb-1">Salary & Payroll Statement</h5>
+            <p class="text-muted small mb-0">
+              Structured financial ledger of active personnel compensations and aggregate payroll obligations.
+            </p>
+          </div>
+        </div>
+
+        <div class="report-meta bg-light p-2.5 rounded-3 mb-4 small text-muted">
+          <div class="d-flex justify-content-between py-1 border-bottom">
+            <span>Engine:</span>
+            <span class="fw-medium text-dark">QuestPDF Layout Engine</span>
+          </div>
+          <div class="d-flex justify-content-between py-1">
+            <span>Audience:</span>
+            <span class="fw-medium text-dark">Finance / HR Payroll</span>
+          </div>
+        </div>
+
+        <div class="mt-auto">
+          <button
+            class="btn btn-outline-danger w-100 py-2"
+            (click)="downloadSalaryPdf()"
+            [disabled]="isLoading('sal-pdf')">
+            <span class="spinner-border spinner-border-sm" *ngIf="isLoading('sal-pdf')"></span>
+            <i class="bi bi-file-earmark-pdf-fill" *ngIf="!isLoading('sal-pdf')"></i>
+            <span>{{ isLoading('sal-pdf') ? 'Rendering PDF...' : 'Download Salary PDF' }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

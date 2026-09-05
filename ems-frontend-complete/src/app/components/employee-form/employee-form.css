@@ -1,0 +1,13 @@
+.form-page-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.form-switch .form-check-input {
+  width: 2.5em;
+  cursor: pointer;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+  color: #94a3b8;
+}

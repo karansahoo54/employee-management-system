@@ -1,0 +1,26 @@
+# Node / Angular
+node_modules/
+dist/
+.angular/
+.cache/
+
+# .NET
+bin/
+obj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Environment / Secrets
+.env
+.env.*
+appsettings.Development.json
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db

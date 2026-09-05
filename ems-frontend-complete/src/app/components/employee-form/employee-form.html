@@ -1,0 +1,200 @@
+<div class="form-page-container">
+  <!-- Breadcrumbs & Header -->
+  <div class="mb-4">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-1 small">
+        <li class="breadcrumb-item"><a routerLink="/employees" class="text-decoration-none">Employees</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ isEditMode ? 'Edit Employee' : 'New Employee' }}</li>
+      </ol>
+    </nav>
+    <h2 class="fw-bold text-dark mb-0">{{ isEditMode ? 'Edit Employee Profile' : 'Add New Employee' }}</h2>
+    <p class="text-muted small">Fill in the employee information below to {{ isEditMode ? 'update' : 'register' }} their profile.</p>
+  </div>
+
+  <!-- Error Alert -->
+  <div class="alert alert-danger d-flex align-items-center gap-2 mb-4" *ngIf="errorMessage">
+    <i class="bi bi-exclamation-circle-fill flex-shrink-0"></i>
+    <div>{{ errorMessage }}</div>
+  </div>
+
+  <!-- Form Card -->
+  <div class="card-modern p-4 p-md-5">
+    <form (ngSubmit)="onSubmit()" novalidate>
+      <!-- Section 1: Basic / Contact Information -->
+      <div class="form-section mb-4 pb-3 border-bottom">
+        <h5 class="fw-semibold text-dark mb-1 d-flex align-items-center gap-2">
+          <i class="bi bi-person-lines-fill text-primary"></i>
+          Personal & Contact Details
+        </h5>
+        <p class="text-muted small mb-3">Primary identity and communication details</p>
+
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold text-secondary">
+              Full Name <span class="text-danger">*</span>
+            </label>
+            <input
+              type="text"
+              class="form-control"
+              [(ngModel)]="employee.fullName"
+              name="fullName"
+              placeholder="e.g. Jane Smith"
+              [class.is-invalid]="submitted && (!employee.fullName || employee.fullName.trim().length < 2)"
+              required>
+            <div class="invalid-feedback" *ngIf="submitted && (!employee.fullName || employee.fullName.trim().length < 2)">
+              Full Name is required (at least 2 characters).
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold text-secondary">
+              Email Address <span class="text-danger">*</span>
+            </label>
+            <input
+              type="email"
+              class="form-control"
+              [(ngModel)]="employee.email"
+              name="email"
+              placeholder="e.g. jane.smith@company.com"
+              [class.is-invalid]="submitted && (!employee.email || !isValidEmail(employee.email))"
+              required>
+            <div class="invalid-feedback" *ngIf="submitted && (!employee.email || !isValidEmail(employee.email))">
+              A valid email address is required.
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold text-secondary">Phone Number</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light text-muted">
+                <i class="bi bi-telephone"></i>
+              </span>
+              <input
+                type="tel"
+                class="form-control"
+                [(ngModel)]="employee.phone"
+                name="phone"
+                placeholder="e.g. +1 555-0199">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Employment Details -->
+      <div class="form-section mb-4">
+        <h5 class="fw-semibold text-dark mb-1 d-flex align-items-center gap-2">
+          <i class="bi bi-briefcase-fill text-primary"></i>
+          Employment & Organization
+        </h5>
+        <p class="text-muted small mb-3">Role, compensation, department assignment, and active status</p>
+
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <label class="form-label small fw-semibold text-secondary mb-0">Department</label>
+              <button
+                type="button"
+                class="btn btn-link p-0 text-decoration-none small text-primary"
+                (click)="showAddDept = !showAddDept">
+                <i class="bi bi-plus-circle me-1"></i>{{ showAddDept ? 'Cancel' : 'New Department' }}
+              </button>
+            </div>
+
+            <!-- Inline department creator if toggled -->
+            <div class="input-group mb-2" *ngIf="showAddDept">
+              <input
+                type="text"
+                class="form-control form-control-sm"
+                [(ngModel)]="newDeptName"
+                name="newDeptName"
+                placeholder="Department name (e.g. Marketing)">
+              <button
+                type="button"
+                class="btn btn-sm btn-primary"
+                [disabled]="!newDeptName.trim() || isAddingDept"
+                (click)="createDepartmentInline()">
+                Add
+              </button>
+            </div>
+
+            <select class="form-select" [(ngModel)]="employee.departmentId" name="departmentId">
+              <option [ngValue]="undefined">-- Select Department --</option>
+              <option *ngFor="let dept of departments" [ngValue]="dept.departmentId">
+                {{ dept.name }}
+              </option>
+            </select>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold text-secondary">Designation / Title</label>
+            <input
+              type="text"
+              class="form-control"
+              [(ngModel)]="employee.designation"
+              name="designation"
+              placeholder="e.g. Senior Software Engineer">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold text-secondary">Salary (Annual USD)</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light text-muted">$</span>
+              <input
+                type="number"
+                min="0"
+                step="500"
+                class="form-control"
+                [(ngModel)]="employee.salary"
+                name="salary"
+                placeholder="e.g. 85000"
+                [class.is-invalid]="submitted && employee.salary !== undefined && employee.salary !== null && employee.salary < 0">
+            </div>
+            <div class="invalid-feedback" *ngIf="submitted && employee.salary !== undefined && employee.salary !== null && employee.salary < 0">
+              Salary cannot be negative.
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold text-secondary">Joining Date</label>
+            <input
+              type="date"
+              class="form-control"
+              [(ngModel)]="employee.joiningDate"
+              name="joiningDate">
+          </div>
+
+          <div class="col-12 mt-4">
+            <div class="form-check form-switch p-3 bg-light rounded-3 border d-flex align-items-center gap-3">
+              <input
+                class="form-check-input ms-0 fs-5"
+                type="checkbox"
+                role="switch"
+                [(ngModel)]="employee.isActive"
+                name="isActive"
+                id="isActiveSwitch">
+              <div>
+                <label class="form-check-label fw-semibold text-dark mb-0" for="isActiveSwitch">
+                  Active Employee Status
+                </label>
+                <div class="text-muted small">
+                  {{ employee.isActive ? 'Employee is active and eligible for payroll and directory listings.' : 'Employee is marked inactive/archived.' }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="d-flex align-items-center justify-content-end gap-2 pt-3 border-top">
+        <button type="button" class="btn btn-light" (click)="cancel()">
+          Cancel
+        </button>
+        <button type="submit" class="btn btn-primary px-4 shadow-sm" [disabled]="isLoading">
+          <span class="spinner-border spinner-border-sm me-2" *ngIf="isLoading" role="status"></span>
+          <span>{{ isLoading ? 'Saving...' : (isEditMode ? 'Update Employee' : 'Save Employee') }}</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
