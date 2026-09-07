@@ -7,16 +7,22 @@ services:
     plan: free
     region: singapore
     healthCheckPath: /health
+
     envVars:
       - key: ASPNETCORE_ENVIRONMENT
         value: Production
+
       - key: ConnectionStrings__DefaultConnection
-        value: Host=aws-0-ap-southeast-1.pooler.supabase.com;Port=6543;Database=postgres;Username=postgres.xeqlokypjgfewdpwodov;Password=Karan7846813002;SSL Mode=Require;Multiplexing=false;No Reset On Close=true
+        sync: false
+
       - key: Jwt__Key
-        value: SuperSecretEmployeeManagementSystemJwtKey2026!MustBeAtLeast512BitsLongForSecurity#9876543210
+        sync: false
+
       - key: Jwt__Issuer
         value: EMS.API
+
       - key: Jwt__Audience
         value: EMS.Client
+
       - key: Jwt__ExpiryMinutes
         value: 1440
